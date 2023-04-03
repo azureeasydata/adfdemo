@@ -6,10 +6,6 @@
 			"type": "string",
 			"metadata": "Data Factory name",
 			"defaultValue": "azureeasydatafactory"
-		},
-		"MoblakBeast_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'MoblakBeast'"
 		}
 	},
 	"variables": {
@@ -25,25 +21,6 @@
 				"typeProperties": {}
 			},
 			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/MoblakBeast')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "SqlServer",
-				"typeProperties": {
-					"connectionString": "[parameters('MoblakBeast_connectionString')]"
-				},
-				"connectVia": {
-					"referenceName": "MoblakHome",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/MoblakHome')]"
-			]
 		}
 	]
 }

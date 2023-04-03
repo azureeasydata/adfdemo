@@ -4,9 +4,6 @@
 	"parameters": {
 		"factoryName": {
 			"value": "azureeasydatafactory"
-		},
-		"MoblakBeast_connectionString": {
-			"value": ""
 		}
 	}
 }

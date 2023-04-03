@@ -7,10 +7,6 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "azureeasydatafactory"
 		},
-		"MoblakBeast_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'MoblakBeast'"
-		},
 		"containerUri": {
 			"type": "string",
 			"metadata": "URI to storage account containing linked ARM templates"
@@ -37,9 +33,6 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
-					},
-					"MoblakBeast_connectionString": {
-						"value": "[parameters('MoblakBeast_connectionString')]"
 					}
 				}
 			},
