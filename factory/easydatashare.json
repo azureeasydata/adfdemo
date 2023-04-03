@@ -1,0 +1,14 @@
+{
+	"name": "easydatashare",
+	"properties": {
+		"globalConfigurations": {
+			"PipelineBillingEnabled": "true"
+		}
+	},
+	"location": "northeurope",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "6890b544-a6ec-4d5c-9d82-7c320d0af780",
+		"tenantId": "e496a18b-5339-49ae-a82f-0f1f12d9f13d"
+	}
+}
