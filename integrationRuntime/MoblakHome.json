@@ -1,0 +1,6 @@
+{
+	"name": "MoblakHome",
+	"properties": {
+		"type": "SelfHosted"
+	}
+}
