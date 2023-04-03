@@ -1,0 +1,69 @@
+{
+	"name": "Copy 100 000 000 rows - Adf Segment",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy ADF",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": "SELECT [Sale Key] AS [Sale_Key]\n      ,[City Key] AS [City_Key]\n      ,[Customer Key] as [Customer_Key]\n      ,[Bill To Customer Key] AS [Bill_To_Customer_Key]\n      ,[Stock Item Key] AS [Stock_Item_Key]\n      ,[Invoice Date Key] AS [Invoice_Date_Key]\n      ,[Delivery Date Key] AS [Delivery_Date_Key]\n      ,[Salesperson Key] AS [Salesperson_Key]\n      ,[WWI Invoice ID] AS [WWI_Invoice_ID]\n      ,[Description]\n      ,[Package]\n      ,[Quantity]\n      ,[Unit Price] AS  [Unit_Price]\n      ,[Tax Rate]  AS [Tax_Rate]\n      ,[Total Excluding Tax] AS [Total_Excluding_Tax]\n      ,[Tax Amount] AS [Tax_Amount]\n      ,[Profit]\n      ,[Total Including Tax] AS [Total_Including_Tax]\n      ,[Total Dry Items] AS [Total_Dry_Items]\n      ,[Total Chiller Items] AS [Total_Chiller_Items]\n      ,[Lineage Key]  AS [Lineage_Key]\n  FROM [Fact].[Sale]\n  WHERE\n\t?AdfDynamicRangePartitionCondition",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "DynamicRange",
+						"partitionSettings": {
+							"partitionColumnName": "[Sale Key]",
+							"partitionUpperBound": "111949558",
+							"partitionLowerBound": "1"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "MoblakBeast_SQL_fact_sale",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DataLake_CSV_Named",
+						"type": "DatasetReference",
+						"parameters": {
+							"fileName": "adf_segment.fact.sale.csv"
+						}
+					}
+				]
+			}
+		],
+		"annotations": []
+	}
+}
