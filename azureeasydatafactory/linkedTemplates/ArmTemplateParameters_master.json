@@ -5,6 +5,15 @@
 		"factoryName": {
 			"value": "azureeasydatafactory"
 		},
+		"DataLake_accountKey": {
+			"value": ""
+		},
+		"MoblakBeastSQL_connectionString": {
+			"value": ""
+		},
+		"DataLake_properties_typeProperties_url": {
+			"value": "https://azureeasydatalake.dfs.core.windows.net/"
+		},
 		"containerUri": {
 			"value": ""
 		},

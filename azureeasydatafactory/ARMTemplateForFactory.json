@@ -6,12 +6,1689 @@
 			"type": "string",
 			"metadata": "Data Factory name",
 			"defaultValue": "azureeasydatafactory"
+		},
+		"DataLake_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'DataLake'"
+		},
+		"MoblakBeastSQL_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'MoblakBeastSQL'"
+		},
+		"DataLake_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://azureeasydatalake.dfs.core.windows.net/"
 		}
 	},
 	"variables": {
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/Copy 100 000 000 rows - Adf Segment Parquet')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy adf Segment",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"sqlReaderQuery": "SELECT \n\t [Sale Key]\t\t\t\t\tAS [Sale_Key]\n\t,[City Key]\t\t\t\t\tAS [City_Key]\n\t,[Customer Key]\t\t\t\tAS [Customer_Key]\n\t,[Bill To Customer Key] \tAS [Bill_To_Customer_Key]\n\t,[Stock Item Key]\t\t\tAS [Stock_Item_Key]\n\t,[Invoice Date Key]\t\t\tAS [Invoice_Date_Key]\n\t,[Delivery Date Key]\t\tAS [Delivery_Date_Key]\n\t,[Salesperson Key]\t\t\tAS [Salesperson_Key]\n\t,[WWI Invoice ID]\t\t\tAS [WWI_Invoice_ID]\n\t,[Description]\t\t\t\tAS [Description]\n\t,[Package]\t\t\t\t\tAS [Package]\n\t,[Quantity]\t\t\t\t\tAS [Quantity]\n\t,[Unit Price]\t\t\t\tAS [Unit_Price]\n\t,[Tax Rate]\t\t\t\t\tAS [Tax_Rate]\n\t,[Total Excluding Tax]\t\tAS [Total_Excluding_Tax]\n\t,[Tax Amount]\t\t\t\tAS [Tax_Amount]\n\t,[Profit]\t\t\t\t\tAS [Profit]\n\t,[Total Including Tax]\t\tAS [Total_Including_Tax]\n\t,[Total Dry Items]\t\t\tAS [Total_Dry_Items]\n\t,[Total Chiller Items]\t\tAS [Total_Chiller_Items]\n\t,[Lineage Key]\t\t\t\tAS [Lineage_Key]\nFROM \n\t[Fact].[Sale]\nWHERE\n\t?AdfDynamicRangePartitionCondition",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "DynamicRange",
+								"partitionSettings": {
+									"partitionColumnName": "[[Sale Key]",
+									"partitionUpperBound": "111949558",
+									"partitionLowerBound": "1"
+								}
+							},
+							"sink": {
+								"type": "ParquetSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "ParquetWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "MoblakBeast_SQL_fact_sale",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DataLake_Par_Folder",
+								"type": "DatasetReference",
+								"parameters": {
+									"folderPath": "segments"
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/MoblakBeast_SQL_fact_sale')]",
+				"[concat(variables('factoryId'), '/datasets/DataLake_Par_Folder')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Copy 100 000 000 rows - Adf Segment')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy adf Segment",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"sqlReaderQuery": "SELECT \n\t [Sale Key]\t\t\t\t\tAS [Sale_Key]\n\t,[City Key]\t\t\t\t\tAS [City_Key]\n\t,[Customer Key]\t\t\t\tAS [Customer_Key]\n\t,[Bill To Customer Key] \tAS [Bill_To_Customer_Key]\n\t,[Stock Item Key]\t\t\tAS [Stock_Item_Key]\n\t,[Invoice Date Key]\t\t\tAS [Invoice_Date_Key]\n\t,[Delivery Date Key]\t\tAS [Delivery_Date_Key]\n\t,[Salesperson Key]\t\t\tAS [Salesperson_Key]\n\t,[WWI Invoice ID]\t\t\tAS [WWI_Invoice_ID]\n\t,[Description]\t\t\t\tAS [Description]\n\t,[Package]\t\t\t\t\tAS [Package]\n\t,[Quantity]\t\t\t\t\tAS [Quantity]\n\t,[Unit Price]\t\t\t\tAS [Unit_Price]\n\t,[Tax Rate]\t\t\t\t\tAS [Tax_Rate]\n\t,[Total Excluding Tax]\t\tAS [Total_Excluding_Tax]\n\t,[Tax Amount]\t\t\t\tAS [Tax_Amount]\n\t,[Profit]\t\t\t\t\tAS [Profit]\n\t,[Total Including Tax]\t\tAS [Total_Including_Tax]\n\t,[Total Dry Items]\t\t\tAS [Total_Dry_Items]\n\t,[Total Chiller Items]\t\tAS [Total_Chiller_Items]\n\t,[Lineage Key]\t\t\t\tAS [Lineage_Key]\nFROM \n\t[Fact].[Sale]\nWHERE\n\t?AdfDynamicRangePartitionCondition",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "DynamicRange",
+								"partitionSettings": {
+									"partitionColumnName": "[[Sale Key]",
+									"partitionUpperBound": "111949558",
+									"partitionLowerBound": "1"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "MoblakBeast_SQL_fact_sale",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DataLake_CSV_Folder",
+								"type": "DatasetReference",
+								"parameters": {
+									"folderPath": "segments"
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/MoblakBeast_SQL_fact_sale')]",
+				"[concat(variables('factoryId'), '/datasets/DataLake_CSV_Folder')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Copy 100 000 000 rows - On-Prem')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy rows from on-prem SQL",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "MoblakBeast_SQL_fact_sale",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DataLake_CSV",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/MoblakBeast_SQL_fact_sale')]",
+				"[concat(variables('factoryId'), '/datasets/DataLake_CSV')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Copy 100 000 000 rows - Parquet')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy rows from on-prem - Par",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"sqlReaderQuery": "SELECT [Sale Key] AS [Sale_Key]\n      ,[City Key] AS [City_Key]\n      ,[Customer Key] as [Customer_Key]\n      ,[Bill To Customer Key] AS [Bill_To_Customer_Key]\n      ,[Stock Item Key] AS [Stock_Item_Key]\n      ,[Invoice Date Key] AS [Invoice_Date_Key]\n      ,[Delivery Date Key] AS [Delivery_Date_Key]\n      ,[Salesperson Key] AS [Salesperson_Key]\n      ,[WWI Invoice ID] AS [WWI_Invoice_ID]\n      ,[Description]\n      ,[Package]\n      ,[Quantity]\n      ,[Unit Price] AS  [Unit_Price]\n      ,[Tax Rate]  AS [Tax_Rate]\n      ,[Total Excluding Tax] AS [Total_Excluding_Tax]\n      ,[Tax Amount] AS [Tax_Amount]\n      ,[Profit]\n      ,[Total Including Tax] AS [Total_Including_Tax]\n      ,[Total Dry Items] AS [Total_Dry_Items]\n      ,[Total Chiller Items] AS [Total_Chiller_Items]\n      ,[Lineage Key]  AS [Lineage_Key]\n  FROM [Fact].[Sale]",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "ParquetSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "ParquetWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "MoblakBeast_SQL_fact_sale",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DataLake_Parquet",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/MoblakBeast_SQL_fact_sale')]",
+				"[concat(variables('factoryId'), '/datasets/DataLake_Parquet')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Copy 100 000 000 rows -Morne Segment Parquet')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Figure out segment",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"sqlReaderQuery": {
+									"value": "@concat('DECLARE @segments\tINT = ',string(pipeline().parameters.splitCount),'\nDECLARE @MyCount\tINT = ',string(pipeline().parameters.splitCount),'\nDECLARE @myTable\tTABLE(SegmentNumber INT NOT NULL, SelectText\tNVARCHAR(4000))\nDECLARE @ColName\tNVARCHAR(150) = ''',pipeline().parameters.keyColumn,'''\nDECLARE @TableName\tNVARCHAR(150) = ''',pipeline().parameters.tableName,'''\nDECLARE @SchemaName\tNVARCHAR(150) = ''',pipeline().parameters.schemaName,'''\n\nIF (SUBSTRING(@ColName,1,1)!=''['')\nBEGIN\n\tSET @ColName = QUOTENAME(@ColName)\nEND\nIF (SUBSTRING(@TableName,1,1)!=''['')\nBEGIN\n\tSET @TableName = QUOTENAME(@TableName)\nEND\nIF (SUBSTRING(@SchemaName,1,1)!=''['')\nBEGIN\n\tSET @SchemaName = QUOTENAME(@SchemaName)\nEND\n\nWHILE @MyCount > 0\nBEGIN\n\nDECLARE @MinId\tBIGINT \nDECLARE @MaxId\tBIGINT  \n\nDECLARE @Command\tNVARCHAR(400) = CONCAT(''SELECT @MinIdOut = MIN(KeyMax),  @MaxIdOut = MAX(KeyMax)FROM (SELECT '',@ColName,'' as KeyMax, NTILE('',@segments,'') OVER(ORDER BY '',@ColName,'' DESC) AS Segment FROM '',@SchemaName,''.'',@TableName,'') as test WHERE test.Segment = '',@MyCount,'''')\n\nDECLARE @ParmDefinition NVARCHAR(500); \nSET @ParmDefinition = N''@MinIdOut BIGINT OUTPUT,   @MaxIdOut BIGINT OUTPUT'';  \n\nEXEC SP_executesql @Command, @ParmDefinition, @MinIdOut=@MinId OUTPUT,@MaxIdOut=@MaxId OUTPUT\n\nINSERT INTO @MyTable \n\t(SegmentNumber, SelectText)\nVALUES\n\t(@MyCount, CONCAT(''SELECT * FROM '', @SchemaName ,''.'', @TableName ,'' WHERE '', @ColName ,'' BETWEEN '', @MinId, '' AND '', @MaxId))\n\tSET @MyCount = @MyCount-1\nEND\nselect * from @myTable\n\n')",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "MoblakBeast_SQL_fact_sale",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEach1",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Figure out segment",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Figure out segment').output.value",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Copy data1",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "SqlServerSource",
+											"sqlReaderQuery": {
+												"value": "@item().SelectText",
+												"type": "Expression"
+											},
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											},
+											"formatSettings": {
+												"type": "ParquetWriteSettings"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "MoblakBeast_SQL_fact_sale",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DataLake_Par_Named",
+											"type": "DatasetReference",
+											"parameters": {
+												"fileName": {
+													"value": "@concat('moblak_segment.fact.sale',item().SegmentNumber,'.csv')",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"keyColumn": {
+						"type": "string",
+						"defaultValue": "[[Sale Key]"
+					},
+					"splitCount": {
+						"type": "string",
+						"defaultValue": "10"
+					},
+					"tableName": {
+						"type": "string",
+						"defaultValue": "[[Sale]"
+					},
+					"schemaName": {
+						"type": "string",
+						"defaultValue": "[[Fact]"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/MoblakBeast_SQL_fact_sale')]",
+				"[concat(variables('factoryId'), '/datasets/DataLake_Par_Named')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Copy 100 000 000 rows -Morne Segment')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Figure out segment",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"sqlReaderQuery": {
+									"value": "@concat('DECLARE @segments\tINT = ',string(pipeline().parameters.splitCount),'\nDECLARE @MyCount\tINT = ',string(pipeline().parameters.splitCount),'\nDECLARE @myTable\tTABLE(SegmentNumber INT NOT NULL, SelectText\tNVARCHAR(4000))\nDECLARE @ColName\tNVARCHAR(150) = ''',pipeline().parameters.keyColumn,'''\nDECLARE @TableName\tNVARCHAR(150) = ''',pipeline().parameters.tableName,'''\nDECLARE @SchemaName\tNVARCHAR(150) = ''',pipeline().parameters.schemaName,'''\n\nIF (SUBSTRING(@ColName,1,1)!=''['')\nBEGIN\n\tSET @ColName = QUOTENAME(@ColName)\nEND\nIF (SUBSTRING(@TableName,1,1)!=''['')\nBEGIN\n\tSET @TableName = QUOTENAME(@TableName)\nEND\nIF (SUBSTRING(@SchemaName,1,1)!=''['')\nBEGIN\n\tSET @SchemaName = QUOTENAME(@SchemaName)\nEND\n\nWHILE @MyCount > 0\nBEGIN\n\nDECLARE @MinId\tBIGINT \nDECLARE @MaxId\tBIGINT  \n\nDECLARE @Command\tNVARCHAR(400) = CONCAT(''SELECT @MinIdOut = MIN(KeyMax),  @MaxIdOut = MAX(KeyMax)FROM (SELECT '',@ColName,'' as KeyMax, NTILE('',@segments,'') OVER(ORDER BY '',@ColName,'' DESC) AS Segment FROM '',@SchemaName,''.'',@TableName,'') as test WHERE test.Segment = '',@MyCount,'''')\n\nDECLARE @ParmDefinition NVARCHAR(500); \nSET @ParmDefinition = N''@MinIdOut BIGINT OUTPUT,   @MaxIdOut BIGINT OUTPUT'';  \n\nEXEC SP_executesql @Command, @ParmDefinition, @MinIdOut=@MinId OUTPUT,@MaxIdOut=@MaxId OUTPUT\n\nINSERT INTO @MyTable \n\t(SegmentNumber, SelectText)\nVALUES\n\t(@MyCount, CONCAT(''SELECT * FROM '', @SchemaName ,''.'', @TableName ,'' WHERE '', @ColName ,'' BETWEEN '', @MinId, '' AND '', @MaxId))\n\tSET @MyCount = @MyCount-1\nEND\nselect * from @myTable\n\n')",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "MoblakBeast_SQL_fact_sale",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEach1",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Figure out segment",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Figure out segment').output.value",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Copy data1",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "SqlServerSource",
+											"sqlReaderQuery": {
+												"value": "@item().SelectText",
+												"type": "Expression"
+											},
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ".txt"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "MoblakBeast_SQL_fact_sale",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DataLake_CSV_Named",
+											"type": "DatasetReference",
+											"parameters": {
+												"fileName": {
+													"value": "@concat('moblak_segment.fact.sale',item().SegmentNumber,'.csv')",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"keyColumn": {
+						"type": "string",
+						"defaultValue": "[[Sale Key]"
+					},
+					"splitCount": {
+						"type": "string",
+						"defaultValue": "10"
+					},
+					"tableName": {
+						"type": "string",
+						"defaultValue": "[[Sale]"
+					},
+					"schemaName": {
+						"type": "string",
+						"defaultValue": "[[Fact]"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/MoblakBeast_SQL_fact_sale')]",
+				"[concat(variables('factoryId'), '/datasets/DataLake_CSV_Named')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pipeline 100 000 000 rows - Segments Parquet')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Segment 1",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"sqlReaderQuery": "SELECT [Sale Key] AS [Sale_Key]\n      ,[City Key] AS [City_Key]\n      ,[Customer Key] as [Customer_Key]\n      ,[Bill To Customer Key] AS [Bill_To_Customer_Key]\n      ,[Stock Item Key] AS [Stock_Item_Key]\n      ,[Invoice Date Key] AS [Invoice_Date_Key]\n      ,[Delivery Date Key] AS [Delivery_Date_Key]\n      ,[Salesperson Key] AS [Salesperson_Key]\n      ,[WWI Invoice ID] AS [WWI_Invoice_ID]\n      ,[Description]\n      ,[Package]\n      ,[Quantity]\n      ,[Unit Price] AS  [Unit_Price]\n      ,[Tax Rate]  AS [Tax_Rate]\n      ,[Total Excluding Tax] AS [Total_Excluding_Tax]\n      ,[Tax Amount] AS [Tax_Amount]\n      ,[Profit]\n      ,[Total Including Tax] AS [Total_Including_Tax]\n      ,[Total Dry Items] AS [Total_Dry_Items]\n      ,[Total Chiller Items] AS [Total_Chiller_Items]\n      ,[Lineage Key]  AS [Lineage_Key]\n  FROM [Fact].[Sale]\n  WHERE\n\t[Sale Key] BETWEEN 1 and 27987390",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "ParquetSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "ParquetWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "MoblakBeast_SQL_fact_sale",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DataLake_Par_Named",
+								"type": "DatasetReference",
+								"parameters": {
+									"fileName": "fact.sale.segment1.parquet"
+								}
+							}
+						]
+					},
+					{
+						"name": "Segment 2",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"sqlReaderQuery": "SELECT [Sale Key] AS [Sale_Key]\n      ,[City Key] AS [City_Key]\n      ,[Customer Key] as [Customer_Key]\n      ,[Bill To Customer Key] AS [Bill_To_Customer_Key]\n      ,[Stock Item Key] AS [Stock_Item_Key]\n      ,[Invoice Date Key] AS [Invoice_Date_Key]\n      ,[Delivery Date Key] AS [Delivery_Date_Key]\n      ,[Salesperson Key] AS [Salesperson_Key]\n      ,[WWI Invoice ID] AS [WWI_Invoice_ID]\n      ,[Description]\n      ,[Package]\n      ,[Quantity]\n      ,[Unit Price] AS  [Unit_Price]\n      ,[Tax Rate]  AS [Tax_Rate]\n      ,[Total Excluding Tax] AS [Total_Excluding_Tax]\n      ,[Tax Amount] AS [Tax_Amount]\n      ,[Profit]\n      ,[Total Including Tax] AS [Total_Including_Tax]\n      ,[Total Dry Items] AS [Total_Dry_Items]\n      ,[Total Chiller Items] AS [Total_Chiller_Items]\n      ,[Lineage Key]  AS [Lineage_Key]\n  FROM [Fact].[Sale]\n  WHERE\n\t[Sale Key] BETWEEN 27987391 and 55974779",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "ParquetSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "ParquetWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "MoblakBeast_SQL_fact_sale",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DataLake_Par_Named",
+								"type": "DatasetReference",
+								"parameters": {
+									"fileName": "fact.sale.segment2.parquet"
+								}
+							}
+						]
+					},
+					{
+						"name": "Segment 3",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"sqlReaderQuery": "SELECT [Sale Key] AS [Sale_Key]\n      ,[City Key] AS [City_Key]\n      ,[Customer Key] as [Customer_Key]\n      ,[Bill To Customer Key] AS [Bill_To_Customer_Key]\n      ,[Stock Item Key] AS [Stock_Item_Key]\n      ,[Invoice Date Key] AS [Invoice_Date_Key]\n      ,[Delivery Date Key] AS [Delivery_Date_Key]\n      ,[Salesperson Key] AS [Salesperson_Key]\n      ,[WWI Invoice ID] AS [WWI_Invoice_ID]\n      ,[Description]\n      ,[Package]\n      ,[Quantity]\n      ,[Unit Price] AS  [Unit_Price]\n      ,[Tax Rate]  AS [Tax_Rate]\n      ,[Total Excluding Tax] AS [Total_Excluding_Tax]\n      ,[Tax Amount] AS [Tax_Amount]\n      ,[Profit]\n      ,[Total Including Tax] AS [Total_Including_Tax]\n      ,[Total Dry Items] AS [Total_Dry_Items]\n      ,[Total Chiller Items] AS [Total_Chiller_Items]\n      ,[Lineage Key]  AS [Lineage_Key]\n  FROM [Fact].[Sale]\n  WHERE\n\t[Sale Key] BETWEEN 55974780 and 83962169",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "ParquetSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "ParquetWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "MoblakBeast_SQL_fact_sale",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DataLake_Par_Named",
+								"type": "DatasetReference",
+								"parameters": {
+									"fileName": "fact.sale.segment3.parquet"
+								}
+							}
+						]
+					},
+					{
+						"name": "Segment 4",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"sqlReaderQuery": "SELECT [Sale Key] AS [Sale_Key]\n      ,[City Key] AS [City_Key]\n      ,[Customer Key] as [Customer_Key]\n      ,[Bill To Customer Key] AS [Bill_To_Customer_Key]\n      ,[Stock Item Key] AS [Stock_Item_Key]\n      ,[Invoice Date Key] AS [Invoice_Date_Key]\n      ,[Delivery Date Key] AS [Delivery_Date_Key]\n      ,[Salesperson Key] AS [Salesperson_Key]\n      ,[WWI Invoice ID] AS [WWI_Invoice_ID]\n      ,[Description]\n      ,[Package]\n      ,[Quantity]\n      ,[Unit Price] AS  [Unit_Price]\n      ,[Tax Rate]  AS [Tax_Rate]\n      ,[Total Excluding Tax] AS [Total_Excluding_Tax]\n      ,[Tax Amount] AS [Tax_Amount]\n      ,[Profit]\n      ,[Total Including Tax] AS [Total_Including_Tax]\n      ,[Total Dry Items] AS [Total_Dry_Items]\n      ,[Total Chiller Items] AS [Total_Chiller_Items]\n      ,[Lineage Key]  AS [Lineage_Key]\n  FROM [Fact].[Sale]\n  WHERE\n\t[Sale Key] BETWEEN 83962170 and 111949558",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "ParquetSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "ParquetWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "MoblakBeast_SQL_fact_sale",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DataLake_Par_Named",
+								"type": "DatasetReference",
+								"parameters": {
+									"fileName": "fact.sale.segment4.parquet"
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/MoblakBeast_SQL_fact_sale')]",
+				"[concat(variables('factoryId'), '/datasets/DataLake_Par_Named')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pipeline 100 000 000 rows - Segments')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Segment 1",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"sqlReaderQuery": "SELECT [Sale Key] AS [Sale_Key]\n      ,[City Key] AS [City_Key]\n      ,[Customer Key] as [Customer_Key]\n      ,[Bill To Customer Key] AS [Bill_To_Customer_Key]\n      ,[Stock Item Key] AS [Stock_Item_Key]\n      ,[Invoice Date Key] AS [Invoice_Date_Key]\n      ,[Delivery Date Key] AS [Delivery_Date_Key]\n      ,[Salesperson Key] AS [Salesperson_Key]\n      ,[WWI Invoice ID] AS [WWI_Invoice_ID]\n      ,[Description]\n      ,[Package]\n      ,[Quantity]\n      ,[Unit Price] AS  [Unit_Price]\n      ,[Tax Rate]  AS [Tax_Rate]\n      ,[Total Excluding Tax] AS [Total_Excluding_Tax]\n      ,[Tax Amount] AS [Tax_Amount]\n      ,[Profit]\n      ,[Total Including Tax] AS [Total_Including_Tax]\n      ,[Total Dry Items] AS [Total_Dry_Items]\n      ,[Total Chiller Items] AS [Total_Chiller_Items]\n      ,[Lineage Key]  AS [Lineage_Key]\n  FROM [Fact].[Sale]\n  WHERE\n\t[Sale Key] BETWEEN 1 and 27987390",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "MoblakBeast_SQL_fact_sale",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DataLake_CSV_Named",
+								"type": "DatasetReference",
+								"parameters": {
+									"fileName": "fact.sale.segment1.csv"
+								}
+							}
+						]
+					},
+					{
+						"name": "Segment 2",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"sqlReaderQuery": "SELECT [Sale Key] AS [Sale_Key]\n      ,[City Key] AS [City_Key]\n      ,[Customer Key] as [Customer_Key]\n      ,[Bill To Customer Key] AS [Bill_To_Customer_Key]\n      ,[Stock Item Key] AS [Stock_Item_Key]\n      ,[Invoice Date Key] AS [Invoice_Date_Key]\n      ,[Delivery Date Key] AS [Delivery_Date_Key]\n      ,[Salesperson Key] AS [Salesperson_Key]\n      ,[WWI Invoice ID] AS [WWI_Invoice_ID]\n      ,[Description]\n      ,[Package]\n      ,[Quantity]\n      ,[Unit Price] AS  [Unit_Price]\n      ,[Tax Rate]  AS [Tax_Rate]\n      ,[Total Excluding Tax] AS [Total_Excluding_Tax]\n      ,[Tax Amount] AS [Tax_Amount]\n      ,[Profit]\n      ,[Total Including Tax] AS [Total_Including_Tax]\n      ,[Total Dry Items] AS [Total_Dry_Items]\n      ,[Total Chiller Items] AS [Total_Chiller_Items]\n      ,[Lineage Key]  AS [Lineage_Key]\n  FROM [Fact].[Sale]\n  WHERE\n\t[Sale Key] BETWEEN 27987391 and 55974779",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "MoblakBeast_SQL_fact_sale",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DataLake_CSV_Named",
+								"type": "DatasetReference",
+								"parameters": {
+									"fileName": "fact.sale.segment2.csv"
+								}
+							}
+						]
+					},
+					{
+						"name": "Segment 3",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"sqlReaderQuery": "SELECT [Sale Key] AS [Sale_Key]\n      ,[City Key] AS [City_Key]\n      ,[Customer Key] as [Customer_Key]\n      ,[Bill To Customer Key] AS [Bill_To_Customer_Key]\n      ,[Stock Item Key] AS [Stock_Item_Key]\n      ,[Invoice Date Key] AS [Invoice_Date_Key]\n      ,[Delivery Date Key] AS [Delivery_Date_Key]\n      ,[Salesperson Key] AS [Salesperson_Key]\n      ,[WWI Invoice ID] AS [WWI_Invoice_ID]\n      ,[Description]\n      ,[Package]\n      ,[Quantity]\n      ,[Unit Price] AS  [Unit_Price]\n      ,[Tax Rate]  AS [Tax_Rate]\n      ,[Total Excluding Tax] AS [Total_Excluding_Tax]\n      ,[Tax Amount] AS [Tax_Amount]\n      ,[Profit]\n      ,[Total Including Tax] AS [Total_Including_Tax]\n      ,[Total Dry Items] AS [Total_Dry_Items]\n      ,[Total Chiller Items] AS [Total_Chiller_Items]\n      ,[Lineage Key]  AS [Lineage_Key]\n  FROM [Fact].[Sale]\n  WHERE\n\t[Sale Key] BETWEEN 55974780 and 83962169",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "MoblakBeast_SQL_fact_sale",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DataLake_CSV_Named",
+								"type": "DatasetReference",
+								"parameters": {
+									"fileName": "fact.sale.segment3.csv"
+								}
+							}
+						]
+					},
+					{
+						"name": "Segment 4",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"sqlReaderQuery": "SELECT [Sale Key] AS [Sale_Key]\n      ,[City Key] AS [City_Key]\n      ,[Customer Key] as [Customer_Key]\n      ,[Bill To Customer Key] AS [Bill_To_Customer_Key]\n      ,[Stock Item Key] AS [Stock_Item_Key]\n      ,[Invoice Date Key] AS [Invoice_Date_Key]\n      ,[Delivery Date Key] AS [Delivery_Date_Key]\n      ,[Salesperson Key] AS [Salesperson_Key]\n      ,[WWI Invoice ID] AS [WWI_Invoice_ID]\n      ,[Description]\n      ,[Package]\n      ,[Quantity]\n      ,[Unit Price] AS  [Unit_Price]\n      ,[Tax Rate]  AS [Tax_Rate]\n      ,[Total Excluding Tax] AS [Total_Excluding_Tax]\n      ,[Tax Amount] AS [Tax_Amount]\n      ,[Profit]\n      ,[Total Including Tax] AS [Total_Including_Tax]\n      ,[Total Dry Items] AS [Total_Dry_Items]\n      ,[Total Chiller Items] AS [Total_Chiller_Items]\n      ,[Lineage Key]  AS [Lineage_Key]\n  FROM [Fact].[Sale]\n  WHERE\n\t[Sale Key] BETWEEN 83962170 and 111949558",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "MoblakBeast_SQL_fact_sale",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DataLake_CSV_Named",
+								"type": "DatasetReference",
+								"parameters": {
+									"fileName": "fact.sale.segment4.csv"
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/MoblakBeast_SQL_fact_sale')]",
+				"[concat(variables('factoryId'), '/datasets/DataLake_CSV_Named')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DataLake_CSV')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "DataLake",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "test.csv",
+						"folderPath": "csv",
+						"fileSystem": "test"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/DataLake')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DataLake_CSV_Folder')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "DataLake",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"folderPath": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": {
+							"value": "@concat('csv/',dataset().folderPath)",
+							"type": "Expression"
+						},
+						"fileSystem": "test"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/DataLake')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DataLake_CSV_Named')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "DataLake",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"fileName": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().fileName",
+							"type": "Expression"
+						},
+						"folderPath": "csv_segment",
+						"fileSystem": "test"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/DataLake')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DataLake_Par_Folder')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "DataLake",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"folderPath": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": {
+							"value": "@concat('parquet/',dataset().folderPath)",
+							"type": "Expression"
+						},
+						"fileSystem": "test"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/DataLake')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DataLake_Par_Named')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "DataLake",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"fileName": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().fileName",
+							"type": "Expression"
+						},
+						"folderPath": "parquet",
+						"fileSystem": "test"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "Sale_Key",
+						"type": "INT64"
+					},
+					{
+						"name": "City_Key",
+						"type": "INT32"
+					},
+					{
+						"name": "Customer_Key",
+						"type": "INT32"
+					},
+					{
+						"name": "Bill_To_Customer_Key",
+						"type": "INT32"
+					},
+					{
+						"name": "Stock_Item_Key",
+						"type": "INT32"
+					},
+					{
+						"name": "Invoice_Date_Key",
+						"type": "DATE"
+					},
+					{
+						"name": "Delivery_Date_Key",
+						"type": "DATE"
+					},
+					{
+						"name": "Salesperson_Key",
+						"type": "INT32"
+					},
+					{
+						"name": "WWI_Invoice_ID",
+						"type": "INT32"
+					},
+					{
+						"name": "Description",
+						"type": "UTF8"
+					},
+					{
+						"name": "Package",
+						"type": "UTF8"
+					},
+					{
+						"name": "Quantity",
+						"type": "INT32"
+					},
+					{
+						"name": "Unit_Price",
+						"type": "DECIMAL",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Tax_Rate",
+						"type": "DECIMAL",
+						"precision": 18,
+						"scale": 3
+					},
+					{
+						"name": "Total_Excluding_Tax",
+						"type": "DECIMAL",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Tax_Amount",
+						"type": "DECIMAL",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Profit",
+						"type": "DECIMAL",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Total_Including_Tax",
+						"type": "DECIMAL",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Total_Dry_Items",
+						"type": "INT32"
+					},
+					{
+						"name": "Total_Chiller_Items",
+						"type": "INT32"
+					},
+					{
+						"name": "Lineage_Key",
+						"type": "INT32"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/DataLake')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DataLake_Parquet')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "DataLake",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "fact.sale.parquet",
+						"folderPath": "parquet",
+						"fileSystem": "test"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/DataLake')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/MoblakBeast_SQL_fact_sale')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "MoblakBeastSQL",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [
+					{
+						"name": "Sale Key",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "City Key",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Customer Key",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Bill To Customer Key",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Stock Item Key",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Invoice Date Key",
+						"type": "date"
+					},
+					{
+						"name": "Delivery Date Key",
+						"type": "date"
+					},
+					{
+						"name": "Salesperson Key",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "WWI Invoice ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Description",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Package",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Quantity",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Unit Price",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Tax Rate",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 3
+					},
+					{
+						"name": "Total Excluding Tax",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Tax Amount",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Profit",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Total Including Tax",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Total Dry Items",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Total Chiller Items",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Lineage Key",
+						"type": "int",
+						"precision": 10
+					}
+				],
+				"typeProperties": {
+					"schema": "Fact",
+					"table": "Sale"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/MoblakBeastSQL')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DataLake')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('DataLake_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('DataLake_accountKey')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/MoblakBeastSQL')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "SqlServer",
+				"typeProperties": {
+					"connectionString": "[parameters('MoblakBeastSQL_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "MoblakHome",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/MoblakHome')]"
+			]
+		},
 		{
 			"name": "[concat(parameters('factoryName'), '/MoblakHome')]",
 			"type": "Microsoft.DataFactory/factories/integrationRuntimes",

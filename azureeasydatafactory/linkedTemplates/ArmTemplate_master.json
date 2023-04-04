@@ -7,6 +7,18 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "azureeasydatafactory"
 		},
+		"DataLake_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'DataLake'"
+		},
+		"MoblakBeastSQL_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'MoblakBeastSQL'"
+		},
+		"DataLake_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://azureeasydatalake.dfs.core.windows.net/"
+		},
 		"containerUri": {
 			"type": "string",
 			"metadata": "URI to storage account containing linked ARM templates"
@@ -33,6 +45,15 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"DataLake_accountKey": {
+						"value": "[parameters('DataLake_accountKey')]"
+					},
+					"MoblakBeastSQL_connectionString": {
+						"value": "[parameters('MoblakBeastSQL_connectionString')]"
+					},
+					"DataLake_properties_typeProperties_url": {
+						"value": "[parameters('DataLake_properties_typeProperties_url')]"
 					}
 				}
 			},
