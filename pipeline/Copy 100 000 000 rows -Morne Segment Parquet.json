@@ -166,7 +166,7 @@
 				"type": "string",
 				"defaultValue": "[Fact]"
 			},
-			"replaceNullInCol": {
+			"replaceNullInColName": {
 				"type": "string",
 				"defaultValue": "1"
 			}
