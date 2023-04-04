@@ -158,7 +158,7 @@
 			},
 			"splitCount": {
 				"type": "string",
-				"defaultValue": "1"
+				"defaultValue": "4"
 			},
 			"tableName": {
 				"type": "string",
@@ -170,7 +170,7 @@
 			},
 			"replaceNullInColName": {
 				"type": "string",
-				"defaultValue": "0"
+				"defaultValue": "1"
 			}
 		},
 		"variables": {
