@@ -1,0 +1,136 @@
+{
+	"name": "Copy 100 000 000 rows -Morne Segment Parquet",
+	"properties": {
+		"activities": [
+			{
+				"name": "Figure out segment",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": {
+							"value": "@concat('DECLARE @segments\tINT = ',string(pipeline().parameters.splitCount),'\nDECLARE @MyCount\tINT = ',string(pipeline().parameters.splitCount),'\nDECLARE @myTable\tTABLE(SegmentNumber INT NOT NULL, SelectText\tNVARCHAR(4000))\nDECLARE @ColName\tNVARCHAR(150) = ''',pipeline().parameters.keyColumn,'''\nDECLARE @TableName\tNVARCHAR(150) = ''',pipeline().parameters.tableName,'''\nDECLARE @SchemaName\tNVARCHAR(150) = ''',pipeline().parameters.schemaName,'''\n\nIF (SUBSTRING(@ColName,1,1)!=''['')\nBEGIN\n\tSET @ColName = QUOTENAME(@ColName)\nEND\nIF (SUBSTRING(@TableName,1,1)!=''['')\nBEGIN\n\tSET @TableName = QUOTENAME(@TableName)\nEND\nIF (SUBSTRING(@SchemaName,1,1)!=''['')\nBEGIN\n\tSET @SchemaName = QUOTENAME(@SchemaName)\nEND\n\nWHILE @MyCount > 0\nBEGIN\n\nDECLARE @MinId\tBIGINT \nDECLARE @MaxId\tBIGINT  \n\nDECLARE @Command\tNVARCHAR(400) = CONCAT(''SELECT @MinIdOut = MIN(KeyMax),  @MaxIdOut = MAX(KeyMax)FROM (SELECT '',@ColName,'' as KeyMax, NTILE('',@segments,'') OVER(ORDER BY '',@ColName,'' DESC) AS Segment FROM '',@SchemaName,''.'',@TableName,'') as test WHERE test.Segment = '',@MyCount,'''')\n\nDECLARE @ParmDefinition NVARCHAR(500); \nSET @ParmDefinition = N''@MinIdOut BIGINT OUTPUT,   @MaxIdOut BIGINT OUTPUT'';  \n\nEXEC SP_executesql @Command, @ParmDefinition, @MinIdOut=@MinId OUTPUT,@MaxIdOut=@MaxId OUTPUT\n\nINSERT INTO @MyTable \n\t(SegmentNumber, SelectText)\nVALUES\n\t(@MyCount, CONCAT(''SELECT * FROM '', @SchemaName ,''.'', @TableName ,'' WHERE '', @ColName ,'' BETWEEN '', @MinId, '' AND '', @MaxId))\n\tSET @MyCount = @MyCount-1\nEND\nselect * from @myTable\n\n')",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "MoblakBeast_SQL_fact_sale",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Figure out segment",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Figure out segment').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Copy data1",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"sqlReaderQuery": {
+										"value": "@item().SelectText",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "ParquetSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "ParquetWriteSettings"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "MoblakBeast_SQL_fact_sale",
+									"type": "DatasetReference"
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DataLake_Par_Named",
+									"type": "DatasetReference",
+									"parameters": {
+										"fileName": {
+											"value": "@concat('moblak_segment.fact.sale',item().SegmentNumber,'.csv')",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"keyColumn": {
+				"type": "string",
+				"defaultValue": "[Sale Key]"
+			},
+			"splitCount": {
+				"type": "string",
+				"defaultValue": "10"
+			},
+			"tableName": {
+				"type": "string",
+				"defaultValue": "[Sale]"
+			},
+			"schemaName": {
+				"type": "string",
+				"defaultValue": "[Fact]"
+			}
+		},
+		"annotations": []
+	}
+}
