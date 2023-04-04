@@ -1074,7 +1074,14 @@
 					{
 						"name": "Figure out segment",
 						"type": "Lookup",
-						"dependsOn": [],
+						"dependsOn": [
+							{
+								"activity": "Get Column List",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
 						"policy": {
 							"timeout": "0.12:00:00",
 							"retry": 0,
@@ -1087,7 +1094,7 @@
 							"source": {
 								"type": "SqlServerSource",
 								"sqlReaderQuery": {
-									"value": "@concat('DECLARE @segments\tINT = ',string(pipeline().parameters.splitCount),'\nDECLARE @MyCount\tINT = ',string(pipeline().parameters.splitCount),'\nDECLARE @myTable\tTABLE(SegmentNumber INT NOT NULL, SelectText\tNVARCHAR(4000))\nDECLARE @ColName\tNVARCHAR(150) = ''',pipeline().parameters.keyColumn,'''\nDECLARE @TableName\tNVARCHAR(150) = ''',pipeline().parameters.tableName,'''\nDECLARE @SchemaName\tNVARCHAR(150) = ''',pipeline().parameters.schemaName,'''\n\nIF (SUBSTRING(@ColName,1,1)!=''['')\nBEGIN\n\tSET @ColName = QUOTENAME(@ColName)\nEND\nIF (SUBSTRING(@TableName,1,1)!=''['')\nBEGIN\n\tSET @TableName = QUOTENAME(@TableName)\nEND\nIF (SUBSTRING(@SchemaName,1,1)!=''['')\nBEGIN\n\tSET @SchemaName = QUOTENAME(@SchemaName)\nEND\n\nWHILE @MyCount > 0\nBEGIN\n\nDECLARE @MinId\tBIGINT \nDECLARE @MaxId\tBIGINT  \n\nDECLARE @Command\tNVARCHAR(400) = CONCAT(''SELECT @MinIdOut = MIN(KeyMax),  @MaxIdOut = MAX(KeyMax)FROM (SELECT '',@ColName,'' as KeyMax, NTILE('',@segments,'') OVER(ORDER BY '',@ColName,'' DESC) AS Segment FROM '',@SchemaName,''.'',@TableName,'') as test WHERE test.Segment = '',@MyCount,'''')\n\nDECLARE @ParmDefinition NVARCHAR(500); \nSET @ParmDefinition = N''@MinIdOut BIGINT OUTPUT,   @MaxIdOut BIGINT OUTPUT'';  \n\nEXEC SP_executesql @Command, @ParmDefinition, @MinIdOut=@MinId OUTPUT,@MaxIdOut=@MaxId OUTPUT\n\nINSERT INTO @MyTable \n\t(SegmentNumber, SelectText)\nVALUES\n\t(@MyCount, CONCAT(''SELECT * FROM '', @SchemaName ,''.'', @TableName ,'' WHERE '', @ColName ,'' BETWEEN '', @MinId, '' AND '', @MaxId))\n\tSET @MyCount = @MyCount-1\nEND\nselect * from @myTable\n\n')",
+									"value": "@concat('DECLARE @segments\tINT = ',string(pipeline().parameters.splitCount),'\nDECLARE @MyCount\tINT = ',string(pipeline().parameters.splitCount),'\nDECLARE @myTable\tTABLE(SegmentNumber INT NOT NULL, SelectText\tNVARCHAR(4000))\nDECLARE @ColName\tNVARCHAR(150) = ''',pipeline().parameters.keyColumn,'''\nDECLARE @TableName\tNVARCHAR(150) = ''',pipeline().parameters.tableName,'''\nDECLARE @SchemaName\tNVARCHAR(150) = ''',pipeline().parameters.schemaName,'''\n\nIF (SUBSTRING(@ColName,1,1)!=''['')\nBEGIN\n\tSET @ColName = QUOTENAME(@ColName)\nEND\nIF (SUBSTRING(@TableName,1,1)!=''['')\nBEGIN\n\tSET @TableName = QUOTENAME(@TableName)\nEND\nIF (SUBSTRING(@SchemaName,1,1)!=''['')\nBEGIN\n\tSET @SchemaName = QUOTENAME(@SchemaName)\nEND\n\nWHILE @MyCount > 0\nBEGIN\n\nDECLARE @MinId\tBIGINT \nDECLARE @MaxId\tBIGINT  \n\nDECLARE @Command\tNVARCHAR(400) = CONCAT(''SELECT @MinIdOut = MIN(KeyMax),  @MaxIdOut = MAX(KeyMax)FROM (SELECT '',@ColName,'' as KeyMax, NTILE('',@segments,'') OVER(ORDER BY '',@ColName,'' DESC) AS Segment FROM '',@SchemaName,''.'',@TableName,'') as test WHERE test.Segment = '',@MyCount,'''')\n\nDECLARE @ParmDefinition NVARCHAR(500); \nSET @ParmDefinition = N''@MinIdOut BIGINT OUTPUT,   @MaxIdOut BIGINT OUTPUT'';  \n\nEXEC SP_executesql @Command, @ParmDefinition, @MinIdOut=@MinId OUTPUT,@MaxIdOut=@MaxId OUTPUT\n\nINSERT INTO @myTable \n\t(SegmentNumber, SelectText)\nVALUES\n\t(@MyCount, CONCAT(''SELECT ',activity('Get Column List').output.firstRow.Columns,' FROM '', @SchemaName ,''.'', @TableName ,'' WHERE '', @ColName ,'' BETWEEN '', @MinId, '' AND '', @MaxId))\n\tSET @MyCount = @MyCount-1\nEND\nselect * from @myTable\n\n')",
 									"type": "Expression"
 								},
 								"queryTimeout": "02:00:00",
@@ -1184,6 +1191,36 @@
 								}
 							]
 						}
+					},
+					{
+						"name": "Get Column List",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"sqlReaderQuery": {
+									"value": "@concat('DECLARE @replaceSpace\tBIT = ',pipeline().parameters.replaceNullInColName,'\n\nSELECT \n\tSTRING_AGG (\n\tCASE \n\tWHEN @replaceSpace = 1 THEN\n\tQUOTENAME(REPLACE(col.name,'' '', ''_'')) \n\tELSE\n\tQUOTENAME(col.name) \n\tEND\n\t, '', '') WITHIN GROUP (ORDER BY [column_id],sch.name, tbl.name ASC) AS [Columns]\nFROM \n\tsys.columns as col\nINNER JOIN\n\tsys.tables as tbl\nON\n\ttbl.object_id = col.object_id\nINNER JOIN\n\tsys.schemas as sch\nON\n\ttbl.schema_id = sch.schema_id\nWHERE\n\ttbl.name = replace(replace(''',pipeline().parameters.tableName,''',''['',''''),'']'','''')\nAND\n\tsch.name = replace(replace(''',pipeline().parameters.schemaName,''',''['',''''),'']'','''')')",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "MoblakBeast_SQL_fact_sale",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": true
+						}
 					}
 				],
 				"policy": {
@@ -1197,7 +1234,7 @@
 					},
 					"splitCount": {
 						"type": "string",
-						"defaultValue": "10"
+						"defaultValue": "4"
 					},
 					"tableName": {
 						"type": "string",
@@ -1206,6 +1243,15 @@
 					"schemaName": {
 						"type": "string",
 						"defaultValue": "[[Fact]"
+					},
+					"replaceNullInColName": {
+						"type": "string",
+						"defaultValue": "1"
+					}
+				},
+				"variables": {
+					"columnInfo": {
+						"type": "String"
 					}
 				},
 				"annotations": []
