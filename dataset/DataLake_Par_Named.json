@@ -1,0 +1,126 @@
+{
+	"name": "DataLake_Par_Named",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "DataLake",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"fileName": {
+				"type": "String"
+			}
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@dataset().fileName",
+					"type": "Expression"
+				},
+				"folderPath": "parquet",
+				"fileSystem": "test"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "Sale_Key",
+				"type": "INT64"
+			},
+			{
+				"name": "City_Key",
+				"type": "INT32"
+			},
+			{
+				"name": "Customer_Key",
+				"type": "INT32"
+			},
+			{
+				"name": "Bill_To_Customer_Key",
+				"type": "INT32"
+			},
+			{
+				"name": "Stock_Item_Key",
+				"type": "INT32"
+			},
+			{
+				"name": "Invoice_Date_Key",
+				"type": "DATE"
+			},
+			{
+				"name": "Delivery_Date_Key",
+				"type": "DATE"
+			},
+			{
+				"name": "Salesperson_Key",
+				"type": "INT32"
+			},
+			{
+				"name": "WWI_Invoice_ID",
+				"type": "INT32"
+			},
+			{
+				"name": "Description",
+				"type": "UTF8"
+			},
+			{
+				"name": "Package",
+				"type": "UTF8"
+			},
+			{
+				"name": "Quantity",
+				"type": "INT32"
+			},
+			{
+				"name": "Unit_Price",
+				"type": "DECIMAL",
+				"precision": 18,
+				"scale": 2
+			},
+			{
+				"name": "Tax_Rate",
+				"type": "DECIMAL",
+				"precision": 18,
+				"scale": 3
+			},
+			{
+				"name": "Total_Excluding_Tax",
+				"type": "DECIMAL",
+				"precision": 18,
+				"scale": 2
+			},
+			{
+				"name": "Tax_Amount",
+				"type": "DECIMAL",
+				"precision": 18,
+				"scale": 2
+			},
+			{
+				"name": "Profit",
+				"type": "DECIMAL",
+				"precision": 18,
+				"scale": 2
+			},
+			{
+				"name": "Total_Including_Tax",
+				"type": "DECIMAL",
+				"precision": 18,
+				"scale": 2
+			},
+			{
+				"name": "Total_Dry_Items",
+				"type": "INT32"
+			},
+			{
+				"name": "Total_Chiller_Items",
+				"type": "INT32"
+			},
+			{
+				"name": "Lineage_Key",
+				"type": "INT32"
+			}
+		]
+	}
+}
