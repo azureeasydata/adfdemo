@@ -1,0 +1,67 @@
+{
+	"name": "Copy 100 000 000 rows - Adf Segment Parquet",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy adf Segment",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": "SELECT \n\t [Sale Key]\t\t\t\t\tAS [Sale_Key]\n\t,[City Key]\t\t\t\t\tAS [City_Key]\n\t,[Customer Key]\t\t\t\tAS [Customer_Key]\n\t,[Bill To Customer Key] \tAS [Bill_To_Customer_Key]\n\t,[Stock Item Key]\t\t\tAS [Stock_Item_Key]\n\t,[Invoice Date Key]\t\t\tAS [Invoice_Date_Key]\n\t,[Delivery Date Key]\t\tAS [Delivery_Date_Key]\n\t,[Salesperson Key]\t\t\tAS [Salesperson_Key]\n\t,[WWI Invoice ID]\t\t\tAS [WWI_Invoice_ID]\n\t,[Description]\t\t\t\tAS [Description]\n\t,[Package]\t\t\t\t\tAS [Package]\n\t,[Quantity]\t\t\t\t\tAS [Quantity]\n\t,[Unit Price]\t\t\t\tAS [Unit_Price]\n\t,[Tax Rate]\t\t\t\t\tAS [Tax_Rate]\n\t,[Total Excluding Tax]\t\tAS [Total_Excluding_Tax]\n\t,[Tax Amount]\t\t\t\tAS [Tax_Amount]\n\t,[Profit]\t\t\t\t\tAS [Profit]\n\t,[Total Including Tax]\t\tAS [Total_Including_Tax]\n\t,[Total Dry Items]\t\t\tAS [Total_Dry_Items]\n\t,[Total Chiller Items]\t\tAS [Total_Chiller_Items]\n\t,[Lineage Key]\t\t\t\tAS [Lineage_Key]\nFROM \n\t[Fact].[Sale]\nWHERE\n\t?AdfDynamicRangePartitionCondition",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "DynamicRange",
+						"partitionSettings": {
+							"partitionColumnName": "[Sale Key]",
+							"partitionUpperBound": "111949558",
+							"partitionLowerBound": "1"
+						}
+					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "ParquetWriteSettings"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "MoblakBeast_SQL_fact_sale",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DataLake_Par_Folder",
+						"type": "DatasetReference",
+						"parameters": {
+							"folderPath": "segments"
+						}
+					}
+				]
+			}
+		],
+		"annotations": []
+	}
+}
