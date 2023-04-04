@@ -156,7 +156,7 @@
 			},
 			"splitCount": {
 				"type": "string",
-				"defaultValue": "10"
+				"defaultValue": "4"
 			},
 			"tableName": {
 				"type": "string",
